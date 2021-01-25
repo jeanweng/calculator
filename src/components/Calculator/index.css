@@ -1,0 +1,12 @@
+
+.calculator {
+	position: relative;
+	border: 2px solid black;
+	width: 400px;
+	height: 603px;
+	margin: 40px auto;
+}
+.box{
+	height: 100px;
+	width: 400px;
+}

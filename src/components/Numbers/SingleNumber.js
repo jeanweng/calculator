@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const SingleNumber = ({className, children, onClick}) =>
-	<button 
+	<button
 		className={className}
 		onClick={onClick}
 		type="button"

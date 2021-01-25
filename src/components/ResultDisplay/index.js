@@ -1,9 +1,9 @@
 import React from 'react';
 import './index.css';
 
-const ResultDisplay = ({allEnter, value}) =>
+const ResultDisplay = ({value, display}) =>
 	<div className="result-display">
-		// <div className="all-enter">{allEnter}</div>
+		<div className="all-enter">{display}</div>
 		<div className="result">{value}</div>
 	</div>
 

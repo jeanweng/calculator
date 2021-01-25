@@ -22,16 +22,16 @@ class Numbers extends Component{
 		return (
 			<div className="container">
 			 {numbers.map(num =>
-			 	<SingleNumber 
+			 	<SingleNumber key={num}
 			 		className="num"
 			 		onClick={() => this.onChange(num)}>
-			 		{num} 
+			 		{num}
 			 	</SingleNumber>
 			 )}
-			 	<SingleNumber 
+			 	<SingleNumber key={0}
 			 		className="zero"
 			 		onClick={() => this.onChange(0)}>
-			 		0
+			 		{0}
 			 	</SingleNumber>
 			</div>
 		);

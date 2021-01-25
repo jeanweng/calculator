@@ -12,15 +12,17 @@ class Calculator extends Component{
 	    super(props);
 
 	    this.state = {
-	      result: 0,
-	      prevVal: 0,
-	      newVal: 0,
+				savedVal: 0,
+	      currVal: 0,
+				currDisplay: "0",
 	      operator: "",
-	      isNewNumberEntered: false,
+				base: 0.1,
+	      isNewNumberEntered: true,
 	      isOperatorEntered: false,
 	      isCompleted: false,
         isDecimalAdded: false,
-
+				displayedEquation: "",
+				actualEquation: []
 	    }
 
 	    this.onEnterNumber = this.onEnterNumber.bind(this);
@@ -32,134 +34,134 @@ class Calculator extends Component{
   	}
 
   	onEnterNumber(num){
-  		if(this.state.isCompleted){
-  			this.setState({
-  				newVal: num,
-	  			isNewNumberEntered: false,
-	  			isOperatorEntered: false,
-	  			isCompleted: false,
-	  			operator: "",
-	  			//equation: num + ""
-  			});
-  		}else if(!this.state.isNewNumberEntered){
-  			this.setState({
-	  			newVal: this.state.newVal * 10 + num,
-	  			isNewNumberEntered: false,
-	  			isOperatorEntered: false,
-	  			//equation: this.state.equation + num
-  			});
-  		}else{
-  			this.setState({
-
-  				newVal: this.state.newVal * 10 + num,
-  				isNewNumberEntered: false,
-  				isOperatorEntered: true,
-  				// equation: this.state.equation + num
-  			});
-  		}
-
+			if(this.state.currVal > 9999999999) return;
+			const {currVal, actualEquation, base, isDecimalAdded, displayedEquation} = this.state;
+			if(this.state.isNewNumberEntered){
+				this.setState({
+					currVal: num,
+					currDisplay: num,
+					isNewNumberEntered: false,
+					actualEquation: [...this.state.actualEquation, num],
+					displayedEquation: displayedEquation + num
+				});
+			}else{
+				let newVal = 0;
+				if(isDecimalAdded){
+					newVal = currVal + num * base;
+					this.setState({
+						base: base / 10
+					});
+				}else{
+					newVal = currVal * 10 + num;
+				}
+				this.setState({
+					currVal: newVal,
+					currDisplay: newVal,
+					isNewNumberEntered: false,
+					actualEquation: [...actualEquation.slice(0, (actualEquation.length - 1)), newVal],
+					displayedEquation: displayedEquation + num
+				})
+			}
   	}
 
   	onAddDecimalPoint(){
-
+			if(!this.state.isDecimalAdded){
+				this.setState({
+					isDecimalAdded: true,
+					displayedEquation: this.state.displayedEquation + "."
+				});
+			}
   	}
 
   	onEnterOperator(op) {
-  		if(this.state.isCompleted){
-  			this.setState({
-  				isNewNumberEntered: false,
-  				isOperatorEntered: true,
-  				isCompleted: false,
-  				operator: op,
-  				newVal: this.state.result,
-  				// equation: this.state.result + op
-  			});
-  		}else if(!this.state.isOperatorEntered){
-	  		const updatedResult = this.updateResult();
-	  		this.setState({
-	  			isNewNumberEntered: true,
-          isOperatorEntered: true,
-	  			operator: op,
-	  			prevVal: this.state.newVal,
-	  			newVal: 0,
-	  			result: updatedResult,
-	  			// equation: this.state.equation + op
-	  		});
-  		}else{
-  			const updatedResult = this.updateResult();
-  			this.setState({
-  				isNewNumberEntered: false,
-  				isOperatorEntered: false,
-  				operator: op,
-  				prevVal: this.state.newVal,
-  				result: updatedResult,
-  				// equation: this.state.equation + op
-  			});
-  		}
+			const {currVal, isOperatorEntered, displayedEquation} = this.state;
+			const currResult = this.updateResult();
+			this.setState({
+				savedVal: isOperatorEntered ? currResult: currVal,
+				currVal: 0,
+				operator: op,
+				base: 0.1,
+				isCompleted: false,
+				isNewNumberEntered: true,
+				isDecimalAdded: false,
+				isOperatorEntered: true,
+				displayedEquation: displayedEquation + op
+			});
   	}
 
   	updateResult(){
-  		const {result, newVal, prevVal, operator} = this.state;
-  		let updatedResult = 0;
+  		const {currVal, savedVal, operator} = this.state;
+			let newVal = savedVal;
   		switch(operator){
   			case "+":
-  				updatedResult = prevVal + newVal;
+  				newVal += currVal;
   				break;
   			case "-":
-  				updatedResult = prevVal - newVal;
+  				newVal -= currVal;
   				break;
   			case "*":
-  				updatedResult = prevVal * newVal;
+  				newVal *= currVal;
   				break;
   			case "/":
-  				updatedResult = prevVal / newVal;
+					if(currVal === 0){
+						return null;
+					}
+  				newVal /= currVal;
   				break;
   			default:
-  				updatedResult = result;
+  				newVal = currVal;
   		}
-  		return updatedResult;
+  		return newVal;
   	}
 
   	onEqualTo(){
-  		const updatedResult = this.updateResult();
-  		this.setState({
-  			isNewNumberEntered: true,
-  			isOperatorEntered: true,
-  			result: updatedResult,
-  			newVal: 0,
-  			prevVal: 0,
-  			operator: "",
-  			// equation: this.state.equation + "=" + updatedResult,
-  			isCompleted: true
-  		});
+			const currResult = this.updateResult();
+			if(currResult === null){
+				this.onReset();
+				this.setState({
+					currDisplay: "Error"
+				});
+				return;
+			}
+			console.log(currResult + " length is " + currResult.toString().length);
+			const resultDisplay = currResult.toString().length <= 12 ? currResult : currResult.toExponential(8);
+			const {displayedEquation} = this.state;
+			let equationDisplay = displayedEquation + "=" + resultDisplay;
+			equationDisplay = equationDisplay.slice(equationDisplay.length - 30, equationDisplay.length);
+			this.setState({
+				currVal: currResult,
+				savedVal: 0,
+				base: 0.1,
+				currDisplay: resultDisplay,
+				isCompleted: true,
+				isNewNumberEntered: true,
+				isDecimalAdded: false,
+				isOperatorEntered: false,
+				operator: "",
+				displayedEquation: equationDisplay
+			});
   	}
 
   	onReset(){
   		this.setState({
-  			isNewNumberEntered: false,
+  			isNewNumberEntered: true,
   			isOperatorEntered: false,
         isDecimalAdded: false,
-  			result: 0,
-  			newVal: 0,
-  			prevVal: 0,
+  			currVal: 0,
+				base: 0.1,
+  			savedVal: 0,
+				currDisplay: "0",
   			operator: "",
-        isCompleted: false
-  			//equation: ""
+        isCompleted: false,
+  			actualEquation: [],
+				displayedEquation: ""
   		});
   	}
 
 	render(){
-		const {result, newVal, isNewNumberEntered, operator, isOperatorEntered} = this.state;
 		return (
 			<div className="calculator">
-				<ResultDisplay
-					// allEnter={equation}
-					value={
-						isNewNumberEntered && isOperatorEntered ? result
-						: !isNewNumberEntered && !isOperatorEntered ? newVal
-						: isNewNumberEntered && !isOperatorEntered ? operator
-						: newVal}
-				/>
+				<ResultDisplay value={this.state.currDisplay} display={this.state.displayedEquation}/>
 				<div className="box">
 					<Reset onClick={this.onReset}/>
 					<EqualOperator onClick={this.onEqualTo}/>

@@ -52,11 +52,11 @@ class Calculator extends Component{
 				// Determine whether the value has a decimal point
 				if(isDecimalAdded){
 					newVal = currVal + num / Math.pow(10, newBase);
+					console.log(newVal);
 					newBase++;
 				}else{
 					newVal = currVal * 10 + num;
 				}
-				console.log(newVal);
 				this.setState({
 					currVal: newVal,
 					base: newBase,
@@ -71,6 +71,7 @@ class Calculator extends Component{
 			const {currDisplay, isNewNumber,displayedEquation} = this.state;
 			if(!this.state.isDecimalAdded){
 				this.setState({
+					isNewNumber: false,
 					isDecimalAdded: true,
 					currDisplay: isNewNumber ? "." : currDisplay + ".",
 					displayedEquation: displayedEquation + "."
@@ -151,6 +152,9 @@ class Calculator extends Component{
 			const resultDisplay = currResult.toString().length <= 12 ? currResult : currResult.toExponential(8);
 			const {displayedEquation} = this.state;
 			let equationDisplay = displayedEquation + "=" + resultDisplay;
+			if(equationDisplay.length > 35){
+				equationDisplay = "..." + equationDisplay.slice(equationDisplay.length - 35, equationDisplay.length);
+			}
 			this.setState({
 				currVal: currResult,
 				base: 1,

@@ -13,7 +13,7 @@ jobs:
           npm run build
 
       - name: Deploy 🚀
-        uses: jeanweng/github-pages-calculator@releases/v2
+        uses: jeanweng/Calculator@releases/v2
         with:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           BRANCH: gh-pages
